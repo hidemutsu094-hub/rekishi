@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>歴史 GAME CENTER</title>
+<style>
+:root{--bg:#0b1020;--panel:#151d33;--panel2:#1d2945;--line:#2d3a5b;--text:#f5f7ff;--muted:#aab6d3;--accent:#8b7cff;--cyan:#51d6d1;--pink:#ff77a8}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(ellipse at top,#202c50 0,#0b1020 55%);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",sans-serif;min-height:100vh}
+header{padding:42px 20px 26px;text-align:center}
+.logo{font-size:clamp(2.4rem,7vw,4.6rem);font-weight:900;letter-spacing:.08em;margin:0;text-shadow:0 0 28px #8b7cff66}
+.sub{color:var(--muted);letter-spacing:.22em;font-size:.78rem;margin-top:8px}
+.wrap{max-width:1050px;margin:auto;padding:0 20px 60px}
+.intro{text-align:center;color:var(--muted);margin:8px 0 28px}
+.cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:15px}
+.card{background:linear-gradient(145deg,var(--panel2),var(--panel));border:1px solid var(--line);border-radius:18px;padding:20px;text-align:left;cursor:pointer;color:var(--text);transition:.18s;min-height:175px}
+.card:hover{transform:translateY(-4px);border-color:var(--accent);box-shadow:0 12px 30px #0005}
+.emoji{font-size:2rem}.card h2{font-size:1.05rem;margin:12px 0 6px}.card p{font-size:.85rem;color:var(--muted);margin:0;line-height:1.5}
+.tag{display:inline-block;margin-top:13px;color:#c8c1ff;background:#6555c833;padding:4px 9px;border-radius:20px;font-size:.72rem}
+.game{display:none;margin:25px auto 0;max-width:720px;background:#111a2e;border:1px solid var(--line);border-radius:20px;padding:clamp(18px,4vw,30px)}
+.game.active{display:block}.game h2{margin:0 0 8px}.desc{color:var(--muted);margin:0 0 22px}
+button,.btn{border:0;border-radius:12px;background:var(--accent);color:white;font-weight:750;padding:12px 18px;cursor:pointer;font-size:1rem}
+button:hover{filter:brightness(1.12)}button:disabled{opacity:.45;cursor:not-allowed}
+.secondary{background:#293653}.back{background:transparent;border:1px solid var(--line);color:var(--muted);margin-bottom:18px}
+.big{font-size:clamp(2rem,8vw,4rem);font-weight:900;text-align:center;margin:20px 0}
+.center{text-align:center}.status{color:var(--cyan);font-weight:700;min-height:1.5em;text-align:center;margin:14px 0}
+input{background:#0b1223;border:1px solid var(--line);color:white;border-radius:10px;padding:12px;font-size:1rem;width:120px}
+.row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;align-items:center}
+.arena{border-radius:16px;background:#27334e;padding:34px 15px;text-align:center;cursor:pointer;user-select:none;font-size:1.25rem;font-weight:800;min-height:145px;display:grid;place-items:center}
+.arena.wait{background:#8c394d}.arena.ready{background:#16846e}
+.choices button{font-size:1.8rem;min-width:90px;background:#293653}
+.memory-grid{display:grid;grid-template-columns:repeat(2, minmax(100px,150px));gap:12px;justify-content:center;margin:22px auto}
+.tile{height:100px;border-radius:16px;border:2px solid #ffffff22;opacity:.8}
+.tile.lit{opacity:1;filter:brightness(1.8);transform:scale(1.04);box-shadow:0 0 25px #fff7}
+.t0{background:#e65d70}.t1{background:#3fba91}.t2{background:#5288e8}.t3{background:#e8b64f}
+footer{text-align:center;color:#7483a5;font-size:.78rem;margin-top:38px}
+@media(max-width:760px){.cards{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:420px){.cards{grid-template-columns:1fr}.card{min-height:130px}}
+</style>
+</head>
+<body>
+<header><h1 class="logo">歴史</h1><div class="sub">HISTORY GAME CENTER</div></header>
+<main class="wrap">
+<p class="intro">好きなゲームを選んで遊ぼう。キミの記録に挑戦！</p>
+<section class="cards" id="menu">
+<button class="card" onclick="openGame('reaction')"><div class="emoji">⚡</div><h2>反射神経チャレンジ</h2><p>合図が変わったらクリック！反応速度を測ろう。</p><span class="tag">SPEED</span></button>
+<button class="card" onclick="openGame('guess')"><div class="emoji">🔢</div><h2>数字当て</h2><p>1〜100の数字を予想。何回で当てられる？</p><span class="tag">BRAIN</span></button>
+<button class="card" onclick="openGame('rps')"><div class="emoji">✊</div><h2>じゃんけんバトル</h2><p>CPUに勝ち越せるかチャレンジ！</p><span class="tag">BATTLE</span></button>
+<button class="card" onclick="openGame('memory')"><div class="emoji">🧠</div><h2>記憶力チャレンジ</h2><p>光る順番を覚えて、同じ順番で押そう。</p><span class="tag">MEMORY</span></button>
+</section>
+
+<section class="game" id="reaction">
+<button class="back" onclick="backToMenu()">← ゲーム一覧へ</button><h2>⚡ 反射神経チャレンジ</h2><p class="desc">スタートを押して待機。緑色になった瞬間にエリアをクリック！</p>
+<div class="arena" id="arena" onclick="hitArena()">スタートを押そう！</div>
+<div class="status" id="reactionStatus">フライングに注意やで！</div>
+<div class="center"><button onclick="startReaction()">スタート</button></div>
+</section>
+
+<section class="game" id="guess">
+<button class="back" onclick="backToMenu()">← ゲーム一覧へ</button><h2>🔢 数字当て</h2><p class="desc">1〜100の中に隠れた数字を当てよう。</p>
+<div class="center"><div class="big">?</div><div class="row"><input id="guessInput" type="number" min="1" max="100" placeholder="数字"><button onclick="makeGuess()">予想する</button><button class="secondary" onclick="resetGuess()">やり直す</button></div><div class="status" id="guessStatus">数字を入力してな！</div><p id="guessCount" class="center">挑戦回数：0回</p></div>
+</section>
+
+<section class="game" id="rps">
+<button class="back" onclick="backToMenu()">← ゲーム一覧へ</button><h2>✊ じゃんけんバトル</h2><p class="desc">好きな手を選んでCPUと勝負！</p>
+<div class="row choices"><button onclick="playRps(0)">✊</button><button onclick="playRps(1)">✌️</button><button onclick="playRps(2)">✋</button></div>
+<div class="big" id="rpsResult">VS</div><div class="status" id="rpsStatus">じゃんけん……ぽん！</div><p class="center" id="rpsScore">あなた 0勝 / CPU 0勝 / あいこ 0回</p>
+<div class="center"><button class="secondary" onclick="resetRps()">スコアリセット</button></div>
+</section>
+
+<section class="game" id="memory">
+<button class="back" onclick="backToMenu()">← ゲーム一覧へ</button><h2>🧠 記憶力チャレンジ</h2><p class="desc">光ったマスの順番を覚えて、同じ順に押そう。</p>
+<div class="status" id="memoryStatus">スタートを押して挑戦！</div>
+<div class="memory-grid" id="memoryGrid"><button class="tile t0" onclick="memoryTap(0)"></button><button class="tile t1" onclick="memoryTap(1)"></button><button class="tile t2" onclick="memoryTap(2)"></button><button class="tile t3" onclick="memoryTap(3)"></button></div>
+<div class="center"><button onclick="startMemory()">スタート</button></div>
+</section>
+<footer>HISTORY GAME CENTER · 小さなゲームセンター計画</footer>
+</main>
+<script>
+let reactionTimer=null,reactionState='idle',reactionStart=0,guessAnswer=0,guessTries=0,rps=[0,0,0],sequence=[],userSequence=[],memoryBusy=false;
+function openGame(id){document.getElementById('menu').style.display='none';document.querySelectorAll('.game').forEach(x=>x.classList.remove('active'));document.getElementById(id).classList.add('active')}
+function backToMenu(){clearTimeout(reactionTimer);reactionState='idle';memoryBusy=false;document.querySelectorAll('.game').forEach(x=>x.classList.remove('active'));document.getElementById('menu').style.display='grid'}
+function startReaction(){clearTimeout(reactionTimer);let a=document.getElementById('arena');reactionState='wait';a.className='arena wait';a.textContent='まだ押したらあかんで…';document.getElementById('reactionStatus').textContent='緑色になるまで待とう';reactionTimer=setTimeout(()=>{reactionState='ready';reactionStart=performance.now();a.className='arena ready';a.textContent='今や！！クリック！'},1200+Math.random()*2800)}
+function hitArena(){let a=document.getElementById('arena'),s=document.getElementById('reactionStatus');if(reactionState==='wait'){clearTimeout(reactionTimer);reactionState='idle';a.className='arena';a.textContent='フライング！';s.textContent='早すぎや！もう一回スタート！'}else if(reactionState==='ready'){let ms=Math.round(performance.now()-reactionStart);reactionState='done';a.className='arena';a.textContent=ms+' ms';s.textContent='反応速度 '+ms+' ミリ秒！もう一回いく？'}else if(reactionState==='idle'){s.textContent='先にスタートを押してな！'}}
+function resetGuess(){guessAnswer=1+Math.floor(Math.random()*100);guessTries=0;document.getElementById('guessInput').value='';document.getElementById('guessStatus').textContent='新しい数字を用意したで！';document.getElementById('guessCount').textContent='挑戦回数：0回'}
+function makeGuess(){let v=Number(document.getElementById('guessInput').value),s=document.getElementById('guessStatus');if(!Number.isInteger(v)||v<1||v>100){s.textContent='1〜100の整数を入力してな！';return}guessTries++;document.getElementById('guessCount').textContent='挑戦回数：'+guessTries+'回';if(v===guessAnswer){s.textContent='正解！！ '+guessTries+'回で当てたで！';}else s.textContent=v<guessAnswer?'もっと大きいで！':'もっと小さいで！'}
+const hands=['✊','✌️','✋'];function playRps(me){let cpu=Math.floor(Math.random()*3),result=(me-cpu+3)%3;let label=result===0?'あいこ！':result===1?'あなたの勝ち！':'CPUの勝ち！';rps[result]++;document.getElementById('rpsResult').textContent=hands[me]+' VS '+hands[cpu];document.getElementById('rpsStatus').textContent=label;document.getElementById('rpsScore').textContent='あなた '+rps[1]+'勝 / CPU '+rps[2]+'勝 / あいこ '+rps[0]+'回'}
+function resetRps(){rps=[0,0,0];document.getElementById('rpsResult').textContent='VS';document.getElementById('rpsStatus').textContent='スコアをリセットしたで！';document.getElementById('rpsScore').textContent='あなた 0勝 / CPU 0勝 / あいこ 0回'}
+const tiles=[...document.querySelectorAll('.tile')];function flashTile(i){tiles[i].classList.add('lit');setTimeout(()=>tiles[i].classList.remove('lit'),330)}
+function startMemory(){if(memoryBusy)return;sequence=[];userSequence=[];memoryBusy=true;for(let i=0;i<3;i++)sequence.push(Math.floor(Math.random()*4));document.getElementById('memoryStatus').textContent='光る順番を覚えてな！';let n=0;let timer=setInterval(()=>{flashTile(sequence[n]);n++;if(n>=sequence.length){clearInterval(timer);memoryBusy=false;document.getElementById('memoryStatus').textContent='今度は同じ順番でマスを押そう！'}},650)}
+function memoryTap(i){if(memoryBusy||sequence.length===0||userSequence.length>=sequence.length)return;flashTile(i);userSequence.push(i);let idx=userSequence.length-1;if(userSequence[idx]!==sequence[idx]){document.getElementById('memoryStatus').textContent='おしい！スタートでもう一回！';sequence=[];return}if(userSequence.length===sequence.length){document.getElementById('memoryStatus').textContent='大成功！ '+sequence.length+'個の順番を覚えたで！';sequence=[]}}
+resetGuess();
+</script>
+</body>
+</html>
